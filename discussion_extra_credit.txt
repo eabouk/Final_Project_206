@@ -1,0 +1,13 @@
+I have decided to do Project 1, the Beautiful Soup and National Parks. I feel the most comfortable with this topic than using the Twitter data, so that is why I have chosen this project. This project involves scraping a website for data and caching it, and also saving the data in a database. 
+
+The first function says: "Write a function to get and cache HTML data about each national park/monument from every state."
+
+
+
+
+First, I will need to have a variable that has a base link for the national parks website saved as an HTML file as cached data. 
+If the file exists, I will read it into a file. If not, I will use the requests.get() function to get data from the national parks website and write it into a variable. 
+
+Once I have that data in a variable, I will pass it into a function that will then scrape the website for all the data about national parks. 
+
+In this function, titled "def get_nat_park_by_state()", the one input parameter will be the HTML file that I had cached above. The first part of this function will be a for loop that changes the link to reflect each unique state by taking a base link and appending the new part of the link to it. Within that for loop, I will save the state name + _parks (so for example "Michigan_parks" would be one example) as a unique key in the CACHE dictionary (that I will have already established at the top of my file), and for each state, I will save in a list of the names of the national parks that occur in each state. 
