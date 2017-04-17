@@ -126,6 +126,17 @@ print(all_front_articles)
 ## STEP 1: Define a class NationalPark that accepts HTML formatted string as input and uses BeautifulSoup data parsing to create
 ## instance variables for every instance of the National Park within the constructor. 
 
+# class NationalPark(html_doc):
+
+# 	soup = BeautifulSoup(html_doc, "html.parser")
+# 	page_info = soup.find_all("div",{"id":"parkListResultsArea"})
+	
+# 	for p in page_info:
+# 		park_names = p.find_all("a",{"id":"anch_"})
+# 		print(park_names)
+
+# for i in range(1):
+
 ## STEP 2: Define class instance variables within the constructor. 
 ## Your class will have 3 instance variables:
 ## 		-park_state: the location/state of each park (a string containing the location)
@@ -171,8 +182,73 @@ print(all_front_articles)
 ############### PART FIVE ############### 
 ## Database Work ##
 
+## Set up your database connection and cursor below...
+conn = sqlite3.connect('national_park_data.db')
+cur = conn.cursor()
+
+## STEP 1: Create a table for national parks and load data from lists into tups into the tables.
+statement = "DROP TABLE IF EXISTS parks"
+cur.execute(statement)
+## For the parks table:
+	# -park_name: text primary key
+	# -park_location: text 
+	# -park_type: (type of park) text
+statement = "CREATE TABLE IF NOT EXISTS parks (park_name TEXT primary key, park_location TEXT, park_type TEXT)"
+cur.execute(statement)
+#load data below...
+
+
+
+
+## STEP 2: Create a table for states information. 
+statement = "DROP TABLE IF EXISTS states"
+cur.execute(statement)
+## For the states table:
+	# -state_abrv: text primary key (2 letter abbreviation)
+	# -num_parks: integer 
+	# -revenue: integer (or long?)
+statement = "CREATE TABLE IF NOT EXISTS states (state_abrv TEXT primary key, num_parks INTEGER, revenue INTEGER)"
+cur.execute(statement)
+#load data below...
+
+
+
+
+## STEP 3: Create a table for article data. 
+statement = "DROP TABLE IF EXISTS articles"
+cur.execute(statement)
+## For the articles table: 
+	# -headline: text primary key (from the "News Releases" website)
+	# -date_released: date type or var char (numbers and dashes)
+	# -related_park: text (park associated with article)
+statement = "CREATE TABLE IF NOT EXISTS articles (headline TEXT primary key, date_released VARCHAR, related_park TEXT)"
+cur.execute(statement)
+#load data below...
+
+
+
+
+
 ############### PART SIX ############### 
-## Data Manipulation
+## Queries ##
+
+## STEP 1: Write a query to join the articles table on the parks table, type_park (on parks table) with related_park (on articles)
+## This query will find the number of articles that have specific parks listed within them.
+
+## STEP 2: Write a query to find the states with num_parks greater than 10. Save that into a variable titled most_parks. 
+
+## STEP 3: Write a query to find the top 5 states with the highest revenue. Save that into a variable titled most_revenue.
+
+
+
+############### PART SEVEN ############### 
+## Data manipulation ## 
+
+## STEP 1: Use a zip function to create a list of tuples of the top 5 states with the highest revenue AND their respective revenue.
+
+## More data manipulation to come? 
+## Wondering how to create the database files before writing the classes... will finish this later? 
+
 
 
 ############### TEST CASES ############### 
