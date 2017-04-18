@@ -41,7 +41,7 @@ state_abrv = {"Alabama": "al", "Alaska": "ak", "Arizona": "az", "Arkansas": "ar"
 "Northern Mariana Islands": "mp", "Guam": "gu", "Puerto Rico": "pr", "Virgin Islands": "vi"}
 #after writing the data_cache function, I will loop through the values of the dictionary above in order to put stuff in a cache file. 
 final_list = []
-
+final_html = []
 def get_national_park_data():
 	
 	for state in state_abrv.keys():
@@ -70,6 +70,7 @@ def get_national_park_data():
 
 			state_tup = (state_title.text, html_doc)
 			final_list.append(state_tup)
+			final_html.append(html_doc)
 			#this portion will run if cache is empty
 
 		else: 
@@ -77,15 +78,20 @@ def get_national_park_data():
 			state_tup = (state, CACHE_DICTION[state])
 			#if the state is already in the dictionary, make a tup and append to final list
 			final_list.append(state_tup)
+			final_html.append(CACHE_DICTION[state])
 
-	return final_list
+	return final_html
+	#I can't decide if this function will return a list of tups with every state and it's html code or just raw html strings without
+	# a name for each one... 
 
 # print(get_national_park_data())
 
-tups_of_all_pages = get_national_park_data()
-print(len(tups_of_all_pages))
+# tups_of_all_pages = get_national_park_data()
+# print(len(tups_of_all_pages))
+# #if tups... use above code
 
-	
+all_html_pages = get_national_park_data()
+print(len(all_html_pages))
 
 
 ## STEP 3: Define a function that gathers HTML data representing all the front page articles on the NPS website. Do some searching
@@ -125,17 +131,41 @@ print(all_front_articles)
 
 ## STEP 1: Define a class NationalPark that accepts HTML formatted string as input and uses BeautifulSoup data parsing to create
 ## instance variables for every instance of the National Park within the constructor. 
+def get_park_names(html_doc):
 
-# class NationalPark(html_doc):
+	soup = BeautifulSoup(html_doc, "html.parser")
+	#print(soup.prettify())
+	page_info = soup.find_all("div",{"class":"col-md-9 col-sm-9 col-xs-12 table-cell list_left"})
+	#page_info = soup.find_all("div", {"class":"parkListResultsArea"})
+	#page_info = soup.find_all("title")
+	print("LEN PAGE INFO", len(page_info))
+	for p in page_info:
+		park_name = p.find_all("a")
+		#print(park_names.get('a'))
+		print(park_name.text)
+		print("hello, hi there")
 
-# 	soup = BeautifulSoup(html_doc, "html.parser")
-# 	page_info = soup.find_all("div",{"id":"parkListResultsArea"})
+		#right now this function/class init function is NOT WORKING! I cannot figure out how to get these very specific things from 
+		#the website... I know that making the soup object works because soup.prettify does return an html page
+		#Something is going wrong in trying to get the pieces of text from the page because page_info does not hold anything in it
+		#I know that I will figure it out in time... and take the attributes and load them into my database. 
+
+		#Furthermore, I will not be able to finish my classes until I figure out this bug... 
+for i in all_html_pages:
+	get_park_names(i)
+	#print("hello")
+
+class NationalPark(object):
+
+	def __init__(html_doc):
+		soup = BeautifulSoup(html_doc, "html.parser")
+		page_info = soup.find_all("div",{"class":"col-md-9 col-sm-9 col-xs-12 table-cell list_left"})
 	
-# 	for p in page_info:
-# 		park_names = p.find_all("a",{"id":"anch_"})
-# 		print(park_names)
+		for p in page_info:
+			park_names = p.find_all("h3", {"class":'a'})
+			print(park_names.text)
 
-# for i in range(1):
+
 
 ## STEP 2: Define class instance variables within the constructor. 
 ## Your class will have 3 instance variables:
@@ -210,6 +240,13 @@ cur.execute(statement)
 statement = "CREATE TABLE IF NOT EXISTS states (state_abrv TEXT primary key, num_parks INTEGER, revenue INTEGER)"
 cur.execute(statement)
 #load data below...
+statement = 'INSERT OR IGNORE INTO states VALUES(?)'
+
+# for thing in state_abrv.values():
+# 	cur.execute(statement, thing)
+# conn.commit()
+#will change this later!
+
 
 
 
@@ -252,38 +289,50 @@ cur.execute(statement)
 
 
 ############### TEST CASES ############### 
-# class pre_tests(unittest.TestCase):
-# 	def test_constructor_1(self):
-# 		#create class instance here
-# 		#class_instance = NationalPark(park_name, park_state)
-# 		self.assertEqual(type(class_instance.park_state), type("this is a string"))
-# 		#testing that the state for each park is a string
-# 	def test_visitor_score(self):
-# 		#create class instance here
-# 		#class_instance = NationalPark(park_name, park_state)
-# 		self.assertEqual(type(class_instance.visitor_score), type(0))
-# 		#testing that the visitor score for a given state
-# 	def test_attendence_type(self):
-# 		#create class instance here
-# 		#class_instance = NationalPark(park_name, park_state)
-# 		self.assertEqual(type(class_instance.highest_attendence), type([]))
-# 		#testing that the method highest_attendence returns a list
-# 	def test_attendence_len(self):
-# 		self.assertEqual(len(class_instance.highest_attendence), 5)
-# 		#testing that this method returns 5 items
-# 	def test_highest_revenue(self):
-# 		#create class instance here
-# 		#class_instance = NationalPark(park_name, park_state)
-# 		self.assertEqual(type(class_instance.highest_revenue), type([]))
-# 	def test_highest_rev_len(self):
-# 		self.assertEqual(len(class_instance.highest_revenue), 5)
-# 		#testing that this method returns 5 things
-# 	def test_most_parks(self):
-# 		self.assertEqual(type(most_parks), type(tuple))
-# 		#testing that this zip computation thing returns a tuple
-# 	def test_most_parks_len(self):
-# 		self.assertEqual(len(most_parks), 5)
+class PART_ONE(unittest.TestCase):
+	def test_caching(self):
+		self.assertEqual(type(CACHE_DICTION), type({}))
+	def test_length_HTML_returns(self):
+		self.assertEqual(len(all_html_pages), 54)
+		#testing 50 countries and 4 territories containing national parks 
+	def test_get_national_park_func(self):
+		self.assertEqual(type(get_national_park_data()), type([]))
+	def test_get_frontpage_aritcles_func(self):
+		self.assertEqual(type(get_national_park_data(), type([]))
 
+class PART_TWO(unittest.TestCase):	
+	def test_constructor_1(self):
+		#create class instance here
+		#class_instance = NationalPark(park_name, park_state)
+		self.assertEqual(type(class_instance.park_state), type("this is a string"))
+		#testing that the state for each park is a string
+	def test_visitor_score(self):
+		#create class instance here
+		#class_instance = NationalPark(park_name, park_state)
+		self.assertEqual(type(class_instance.visitor_score), type(0))
+		#testing that the visitor score for a given state
+	def test_attendence_type(self):
+		#create class instance here
+		#class_instance = NationalPark(park_name, park_state)
+		self.assertEqual(type(class_instance.highest_attendence), type([]))
+		#testing that the method highest_attendence returns a list
+	def test_attendence_len(self):
+		self.assertEqual(len(class_instance.highest_attendence), 5)
+		#testing that this method returns 5 items
+	def test_highest_revenue(self):
+		#create class instance here
+		#class_instance = NationalPark(park_name, park_state)
+		self.assertEqual(type(class_instance.highest_revenue), type([]))
+	def test_highest_rev_len(self):
+		self.assertEqual(len(class_instance.highest_revenue), 5)
+		#testing that this method returns 5 things
+	def test_most_parks(self):
+		self.assertEqual(type(most_parks), type(tuple))
+		#testing that this zip computation thing returns a tuple
+	def test_most_parks_len(self):
+		self.assertEqual(len(most_parks), 5)
+#will write more test cases when more code is written....
+#will solidify the test case ideas when more code is written...
 ## Remember to invoke all your tests...
 if __name__ == "__main__":
 	unittest.main(verbosity=2)
