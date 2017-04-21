@@ -121,18 +121,20 @@ def get_frontpage_articles():
 		response = requests.get(base_url)
 		html_doc = response.text
 
-		soup = BeautifulSoup(html_doc, "html.parser")
-		page_info = soup.find_all("div", {"class":"Feature-imageContainer"})
+		# soup = BeautifulSoup(html_doc, "html.parser")
+		# page_info = soup.find_all("div", {"class":"Feature-imageContainer"})
 
-		for p in page_info:
-			article_title = p.find("h3",{"class":"Feature-title carrot-end"})
-			nps_front_page.append(article_title.text)
-			# print(article_title.text)
+		# for p in page_info:
+		# 	article_title = p.find("h3",{"class":"Feature-title carrot-end"})
+		# 	nps_front_page.append(article_title.text)
+		# 	# print(article_title.text)
 
-		CACHE_DICTION["NPS_front_articles"] = nps_front_page
+		CACHE_DICTION["NPS_front_articles"] = html_doc
 		f = open(CACHE_FILE, 'w')
 		f.write(json.dumps(CACHE_DICTION))
 		f.close()
+
+		return CACHE_DICTION["NPS_front_articles"]
 
 	else:
 		nps_front_page = CACHE_DICTION["NPS_front_articles"]
@@ -140,7 +142,7 @@ def get_frontpage_articles():
 	return nps_front_page
 
 all_front_articles = get_frontpage_articles()
-# print(all_front_articles)
+#print(type(all_front_articles))
 
 ############### PART TWO ############### 
 ## Class 1 ##
@@ -149,25 +151,15 @@ all_front_articles = get_frontpage_articles()
 ## instance variables for every instance of the National Park within the constructor. 
 # def get_park_names(html_doc):
 
-# 	soup = BeautifulSoup(html_doc, "html.parser")
-# 	page_info = soup.find_all("div",{"class": "col-md-9 col-sm-9 col-xs-12 table-cell list_left"})
-# 	# for p in page_info:
-# 	# 	park_name = p.find_all("h3")
-	
-# 	# 	for e in park_name:
-# 	# 		print(e.text)
-# 	return page_info
-
-# park_objects = []
-# for i in all_html_pages:
-# 	one_states_parks = get_park_names(i)
-# 	park_objects.append(one_states_parks)
-
-	
-
-# 	#print("hello")
 
 class NationalPark(object):
+
+## STEP 2: Define class instance variables within the constructor. 
+## Your class will have 3 instance variables:
+## 		-park_name: the name of the park
+## 		-park_location: a string containing the state(s)/city of the park
+## 		-park_descriiption:  a string containing a description about the park
+##		-park_type: the type of the park (battle ground, national park, historical landmark etc.)
 
 	def __init__(self, html_doc):
 		soup = BeautifulSoup(html_doc, "html.parser")
@@ -198,6 +190,8 @@ class NationalPark(object):
 			park_type = b.find_all("h2")
 			for p in park_type:
 				self.park_type = p.text
+## STEP 3: Define a method of your class called num_parks that finds and returns the number of parks in each state. It will take in 
+## HTML data representing each state's park page and returns the number of parks in that state.
 
 	def num_parks(self, html_doc):
 		soup = BeautifulSoup(html_doc, "html.parser")
@@ -212,6 +206,10 @@ class NationalPark(object):
 					num_parks = soup.find_all("strong")
 					num_parks = num_parks[0].text
 		return num_parks
+
+## STEP : Define a method of your class called visitor_score that takes HTML data representing each state's park page and returns 
+## the number of visitors that visit national parks annually. This will not affect any data, simply it finds the number of annual
+## visitors and returns it. You will use this number later for data processing later in this file.
 
 	def visitor_score(self, html_doc):
 		soup = BeautifulSoup(html_doc, "html.parser")
@@ -245,34 +243,63 @@ print(one_park.visitor_score(all_html_pages[0]))
 print(one_park.num_parks(all_html_pages[0]))
 
 
-## STEP 2: Define class instance variables within the constructor. 
-## Your class will have 3 instance variables:
-## 		-park_state: the location/state of each park (a string containing the location)
-## 		-park_info: a string containing a description about the park
-##		-map_link: a link to the map for the park 
-
-## STEP 3: Define a method of your class called visitor_score that takes HTML data representing each state's park page and returns 
-## the number of visitors that visit national parks annually. This will not affect any data, simply it finds the number of annual
-## visitors and returns it. You will use this number later for data processing later in this file.
-
-## STEP 4: Define a method of your class called num_parks that finds and returns the number of parks in each state. It will take in 
-## HTML data representing each state's park page and returns the number of parks in that state.
-
-## STEP 5: Define a method of your class called annual_revenue that takes HTML data representing a state's park page and reuturns 
-## the total annual revenue that is gained from state parks in that given state. 
-
-
 
 ############### PART THREE ############### 
 ## Class 2 ##
 
 ## STEP 1: Define a class Article that accepts an HTML formatted string representing one single article page. 
+class Article(object):
+
+	def __init__(self, html_doc):
+
+		soup = BeautifulSoup(html_doc, "html.parser")
+		page_info = soup.find_all("div", {"class":"Feature-imageContainer"})
 
 ## STEP 2: Define 2 instance variables for this class:
 ## 		- Title: the title of the article
-## 		- Text: the text of the article
+## 		- Text: the SUBHEADER of the article
+
+		for p in page_info:
+			article_title = p.find_all("h3",{"class":"Feature-title carrot-end"})
+			for r in article_title:
+				self.title = r.text
+			# print(article_title.text)
 
 
+		for p in page_info:
+			description = p.find_all("p", {"class": "Feature-description"})
+			for f in description:
+				self.description = f.text
+
+	def list_of_titles(self, html_doc):
+		list_of_titles = []
+
+		soup = BeautifulSoup(html_doc, "html.parser")
+		page_info = soup.find_all("div", {"class":"Feature-imageContainer"})
+
+		for p in page_info:
+			article_title = p.find_all("h3",{"class":"Feature-title carrot-end"})
+			for r in article_title:
+				list_of_titles.append(r.text)
+		
+		return list_of_titles
+
+	def list_of_descriptions(self, html_doc):
+		list_of_descriptions = []
+
+		soup = BeautifulSoup(html_doc, "html.parser")
+		page_info = soup.find_all("div", {"class":"Feature-imageContainer"})
+
+		for p in page_info:
+			description = p.find_all("p", {"class": "Feature-description"})
+			for f in description:
+				list_of_descriptions.append(f.text)
+
+		return list_of_descriptions
+
+article_thing = Article(all_front_articles)
+
+print ("printing front page article titles", article_thing.list_of_titles(all_front_articles))
 
 ############### PART FOUR ############### 
 ## Creating lists from Classes ## 
