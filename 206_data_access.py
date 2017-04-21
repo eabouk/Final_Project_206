@@ -45,12 +45,14 @@ final_html = []
 def get_national_park_data():
 	
 	for state in state_abrv.keys():
+	
 		if state not in CACHE_DICTION:
 
 	#lets put all keys and values in the dict
 			#print("hello")
 			# for abrv in state_abrv.values():
 			base_url = "https://www.nps.gov/state/" + state_abrv.get(state) + "/index.htm"
+			#print("PRINTING BASE URL", base_url)
 			response = requests.get(base_url)
 			html_doc = response.text
 
@@ -62,11 +64,8 @@ def get_national_park_data():
 				state_title = p.find("h1",{"class": "page-title"})
 				#print(state_title.text)
 
-			json_html = json.dumps(html_doc)
-			CACHE_DICTION[state_title.text] = json_html
-			f = open(CACHE_FILE, 'w')
-			f.write(json.dumps(CACHE_DICTION))
-			f.close()
+			CACHE_DICTION[state_title.text] = html_doc
+		
 
 			state_tup = (state_title.text, html_doc)
 			final_list.append(state_tup)
@@ -78,8 +77,12 @@ def get_national_park_data():
 			state_tup = (state, CACHE_DICTION[state])
 			#if the state is already in the dictionary, make a tup and append to final list
 			final_list.append(state_tup)
+
 			final_html.append(CACHE_DICTION[state])
 
+	f = open(CACHE_FILE, 'w')
+	f.write(json.dumps(CACHE_DICTION))
+	f.close()
 	return final_html
 	#I can't decide if this function will return a list of tups with every state and it's html code or just raw html strings without
 	# a name for each one... 
@@ -89,9 +92,22 @@ def get_national_park_data():
 # tups_of_all_pages = get_national_park_data()
 # print(len(tups_of_all_pages))
 # #if tups... use above code
+# print("get_national_park_data start")
 
 all_html_pages = get_national_park_data()
-print(len(all_html_pages))
+
+# print("get_national_park_data end")
+# print(len(all_html_pages))
+# q = 0
+# for i in all_html_pages:
+# 	# print(i)
+# 	q += 1
+# 	# print ("PIZZA", type(i))
+# 	if q == 2:
+# 		break
+
+# for i in all_html_pages:
+# 	print("PRINTING TYPE PAGE", type(i))
 
 
 ## STEP 3: Define a function that gathers HTML data representing all the front page articles on the NPS website. Do some searching
@@ -124,49 +140,62 @@ def get_frontpage_articles():
 	return nps_front_page
 
 all_front_articles = get_frontpage_articles()
-print(all_front_articles)
+# print(all_front_articles)
 
 ############### PART TWO ############### 
 ## Class 1 ##
 
 ## STEP 1: Define a class NationalPark that accepts HTML formatted string as input and uses BeautifulSoup data parsing to create
 ## instance variables for every instance of the National Park within the constructor. 
-def get_park_names(html_doc):
+# def get_park_names(html_doc):
 
-	soup = BeautifulSoup(html_doc, "html.parser")
-	#print(soup.prettify())
-	page_info = soup.find_all("div",{"class":"col-md-9 col-sm-9 col-xs-12 table-cell list_left"})
-	#page_info = soup.find_all("div", {"class":"parkListResultsArea"})
-	#page_info = soup.find_all("title")
-	print("LEN PAGE INFO", len(page_info))
-	for p in page_info:
-		park_name = p.find_all("a")
-		#print(park_names.get('a'))
-		print(park_name.text)
-		print("hello, hi there")
+# 	soup = BeautifulSoup(html_doc, "html.parser")
+# 	page_info = soup.find_all("div",{"class": "col-md-9 col-sm-9 col-xs-12 table-cell list_left"})
+# 	# for p in page_info:
+# 	# 	park_name = p.find_all("h3")
+	
+# 	# 	for e in park_name:
+# 	# 		print(e.text)
+# 	return page_info
 
-		#right now this function/class init function is NOT WORKING! I cannot figure out how to get these very specific things from 
-		#the website... I know that making the soup object works because soup.prettify does return an html page
-		#Something is going wrong in trying to get the pieces of text from the page because page_info does not hold anything in it
-		#I know that I will figure it out in time... and take the attributes and load them into my database. 
+# park_objects = []
+# for i in all_html_pages:
+# 	one_states_parks = get_park_names(i)
+# 	park_objects.append(one_states_parks)
 
-		#Furthermore, I will not be able to finish my classes until I figure out this bug... 
-for i in all_html_pages:
-	get_park_names(i)
-	#print("hello")
+	
+
+# 	#print("hello")
 
 class NationalPark(object):
 
-	def __init__(html_doc):
+	def __init__(self, html_doc):
 		soup = BeautifulSoup(html_doc, "html.parser")
-		page_info = soup.find_all("div",{"class":"col-md-9 col-sm-9 col-xs-12 table-cell list_left"})
-	
+		page_info = soup.find_all("div",{"class": "col-md-9 col-sm-9 col-xs-12 table-cell list_left"})
+		#park names
 		for p in page_info:
-			park_names = p.find_all("h3", {"class":'a'})
-			print(park_names.text)
+			park_names = p.find_all("h3")
+			for q in park_names:
+				self.park_name = q.text
+				#print(q.text)
 
+		
+		for l in page_info:
+			park_location = l.find_all("h4")
+			for m in park_location:
+				self.park_location = m.text
+				#print(m.text)
 
+		for t in page_info:
+			park_description = t.find_all("p")
+			for w in park_description:
+				self.park_description = w.text
+				#print(w.text)
 
+one_park = NationalPark(all_html_pages[0])
+#later I'm going to create a list of states with all their parks... maybe another dictionary? 
+#each state as a key and the list of parks by value 
+print(one_park.park_name)
 ## STEP 2: Define class instance variables within the constructor. 
 ## Your class will have 3 instance variables:
 ## 		-park_state: the location/state of each park (a string containing the location)
@@ -289,50 +318,50 @@ cur.execute(statement)
 
 
 ############### TEST CASES ############### 
-class PART_ONE(unittest.TestCase):
-	def test_caching(self):
-		self.assertEqual(type(CACHE_DICTION), type({}))
-	def test_length_HTML_returns(self):
-		self.assertEqual(len(all_html_pages), 54)
-		#testing 50 countries and 4 territories containing national parks 
-	def test_get_national_park_func(self):
-		self.assertEqual(type(get_national_park_data()), type([]))
-	def test_get_frontpage_aritcles_func(self):
-		self.assertEqual(type(get_national_park_data(), type([]))
+# class PART_ONE(unittest.TestCase):
+# 	def test_caching(self):
+# 		self.assertEqual(type(CACHE_DICTION), type({}))
+# 	def test_length_HTML_returns(self):
+# 		self.assertEqual(len(all_html_pages), 54)
+# 		#testing 50 countries and 4 territories containing national parks 
+# 	def test_get_national_park_func(self):
+# 		self.assertEqual(type(get_national_park_data()), type([]))
+# 	def test_get_frontpage_aritcles_func(self):
+# 		self.assertEqual(type(get_national_park_data(), type([]))
 
-class PART_TWO(unittest.TestCase):	
-	def test_constructor_1(self):
-		#create class instance here
-		#class_instance = NationalPark(park_name, park_state)
-		self.assertEqual(type(class_instance.park_state), type("this is a string"))
-		#testing that the state for each park is a string
-	def test_visitor_score(self):
-		#create class instance here
-		#class_instance = NationalPark(park_name, park_state)
-		self.assertEqual(type(class_instance.visitor_score), type(0))
-		#testing that the visitor score for a given state
-	def test_attendence_type(self):
-		#create class instance here
-		#class_instance = NationalPark(park_name, park_state)
-		self.assertEqual(type(class_instance.highest_attendence), type([]))
-		#testing that the method highest_attendence returns a list
-	def test_attendence_len(self):
-		self.assertEqual(len(class_instance.highest_attendence), 5)
-		#testing that this method returns 5 items
-	def test_highest_revenue(self):
-		#create class instance here
-		#class_instance = NationalPark(park_name, park_state)
-		self.assertEqual(type(class_instance.highest_revenue), type([]))
-	def test_highest_rev_len(self):
-		self.assertEqual(len(class_instance.highest_revenue), 5)
-		#testing that this method returns 5 things
-	def test_most_parks(self):
-		self.assertEqual(type(most_parks), type(tuple))
-		#testing that this zip computation thing returns a tuple
-	def test_most_parks_len(self):
-		self.assertEqual(len(most_parks), 5)
-#will write more test cases when more code is written....
-#will solidify the test case ideas when more code is written...
-## Remember to invoke all your tests...
-if __name__ == "__main__":
-	unittest.main(verbosity=2)
+# class PART_TWO(unittest.TestCase):	
+# 	def test_constructor_1(self):
+# 		#create class instance here
+# 		#class_instance = NationalPark(park_name, park_state)
+# 		self.assertEqual(type(class_instance.park_state), type("this is a string"))
+# 		#testing that the state for each park is a string
+# 	def test_visitor_score(self):
+# 		#create class instance here
+# 		#class_instance = NationalPark(park_name, park_state)
+# 		self.assertEqual(type(class_instance.visitor_score), type(0))
+# 		#testing that the visitor score for a given state
+# 	def test_attendence_type(self):
+# 		#create class instance here
+# 		#class_instance = NationalPark(park_name, park_state)
+# 		self.assertEqual(type(class_instance.highest_attendence), type([]))
+# 		#testing that the method highest_attendence returns a list
+# 	def test_attendence_len(self):
+# 		self.assertEqual(len(class_instance.highest_attendence), 5)
+# 		#testing that this method returns 5 items
+# 	def test_highest_revenue(self):
+# 		#create class instance here
+# 		#class_instance = NationalPark(park_name, park_state)
+# 		self.assertEqual(type(class_instance.highest_revenue), type([]))
+# 	def test_highest_rev_len(self):
+# 		self.assertEqual(len(class_instance.highest_revenue), 5)
+# 		#testing that this method returns 5 things
+# 	def test_most_parks(self):
+# 		self.assertEqual(type(most_parks), type(tuple))
+# 		#testing that this zip computation thing returns a tuple
+# 	def test_most_parks_len(self):
+# 		self.assertEqual(len(most_parks), 5)
+# #will write more test cases when more code is written....
+# #will solidify the test case ideas when more code is written...
+# ## Remember to invoke all your tests...
+# if __name__ == "__main__":
+# 	unittest.main(verbosity=2)
