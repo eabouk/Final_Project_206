@@ -179,23 +179,72 @@ class NationalPark(object):
 				self.park_name = q.text
 				#print(q.text)
 
-		
+		#park_location
 		for l in page_info:
 			park_location = l.find_all("h4")
 			for m in park_location:
 				self.park_location = m.text
 				#print(m.text)
 
+		#park_description
 		for t in page_info:
 			park_description = t.find_all("p")
 			for w in park_description:
 				self.park_description = w.text
 				#print(w.text)
 
+		#park_type
+		for b in page_info:
+			park_type = b.find_all("h2")
+			for p in park_type:
+				self.park_type = p.text
+
+	def num_parks(self, html_doc):
+		soup = BeautifulSoup(html_doc, "html.parser")
+		page_info = soup.find_all("div", {"id": "list_numbers"})
+
+		for p in page_info:
+			numbers = soup.find_all("ul", {"class":"state_numbers"})
+			for n in numbers:
+				num_parks = soup.find_all("li")
+				for x in num_parks:
+					#print(x.text)
+					num_parks = soup.find_all("strong")
+					num_parks = num_parks[0].text
+		return num_parks
+
+	def visitor_score(self, html_doc):
+		soup = BeautifulSoup(html_doc, "html.parser")
+		page_info = soup.find_all("div", {"id": "list_numbers"})
+
+		for p in page_info:
+			numbers = soup.find_all("ul", {"class":"state_numbers"})
+			for n in numbers:
+				num_visitors = soup.find_all("li")
+				for x in num_visitors:
+					#print(x.text)
+					num_visitors = soup.find_all("strong")
+					num_visitors = num_visitors[1].text
+					# for w in num_visitors:
+					# 	print(w[1])
+						# num_visitors = num_visitors[1]
+						# print(num_visitors)
+		return num_visitors
+
+
+#TO DO:
+# MAKE A LIST OF ALL THE PARKS FOR EVERY STATE, SAVE TO DICTIONARY
+# MAKE A LIST OF 
+
 one_park = NationalPark(all_html_pages[0])
 #later I'm going to create a list of states with all their parks... maybe another dictionary? 
 #each state as a key and the list of parks by value 
 print(one_park.park_name)
+print(one_park.visitor_score(all_html_pages[0]))
+
+print(one_park.num_parks(all_html_pages[0]))
+
+
 ## STEP 2: Define class instance variables within the constructor. 
 ## Your class will have 3 instance variables:
 ## 		-park_state: the location/state of each park (a string containing the location)
