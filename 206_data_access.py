@@ -40,7 +40,7 @@ state_abrv = {"Alabama": "al", "Alaska": "ak", "Arizona": "az", "Arkansas": "ar"
 "Utah": "ut", "Vermont": "vt", "Virginia": "va", "Washington": "wa", "West Virginia": "wv", "Wisconsin": "wi", "Wyoming": "wy", 
 "Northern Mariana Islands": "mp", "Guam": "gu", "Puerto Rico": "pr", "Virgin Islands": "vi"}
 #after writing the data_cache function, I will loop through the values of the dictionary above in order to put stuff in a cache file. 
-final_list = []
+#final_list = []
 final_html = []
 def get_national_park_data():
 	
@@ -65,24 +65,20 @@ def get_national_park_data():
 				#print(state_title.text)
 
 			CACHE_DICTION[state_title.text] = html_doc
-		
+			
+			f = open(CACHE_FILE, 'w')
+			f.write(json.dumps(CACHE_DICTION))
+			f.close()
 
-			state_tup = (state_title.text, html_doc)
-			final_list.append(state_tup)
+			#state_tup = (state_title.text, html_doc)
+			#final_list.append(state_tup)
 			final_html.append(html_doc)
 			#this portion will run if cache is empty
 
 		else: 
-			#this portion will run if cache diction has stuff in it already
-			state_tup = (state, CACHE_DICTION[state])
-			#if the state is already in the dictionary, make a tup and append to final list
-			final_list.append(state_tup)
-
 			final_html.append(CACHE_DICTION[state])
 
-	f = open(CACHE_FILE, 'w')
-	f.write(json.dumps(CACHE_DICTION))
-	f.close()
+
 	return final_html
 	#I can't decide if this function will return a list of tups with every state and it's html code or just raw html strings without
 	# a name for each one... 
@@ -190,11 +186,15 @@ class NationalPark(object):
 			park_type = b.find_all("h2")
 			for p in park_type:
 				self.park_type = p.text
+
+		#state_name
+		# for g in page_info:
+		# 	state_name = 
 ## STEP 3: Define a method of your class called num_parks that finds and returns the number of parks in each state. It will take in 
 ## HTML data representing each state's park page and returns the number of parks in that state.
 
-	def num_parks(self, html_doc):
-		soup = BeautifulSoup(html_doc, "html.parser")
+	def num_parks(self):
+		soup = BeautifulSoup(self, "html.parser")
 		page_info = soup.find_all("div", {"id": "list_numbers"})
 
 		for p in page_info:
@@ -240,7 +240,7 @@ one_park = NationalPark(all_html_pages[0])
 print(one_park.park_name)
 print(one_park.visitor_score(all_html_pages[0]))
 
-print(one_park.num_parks(all_html_pages[0]))
+print(one_park.num_parks())
 
 
 
@@ -299,14 +299,37 @@ class Article(object):
 
 article_thing = Article(all_front_articles)
 
-print ("printing front page article titles", article_thing.list_of_titles(all_front_articles))
+#print ("printing front page article titles", article_thing.list_of_titles(all_front_articles))
 
 ############### PART FOUR ############### 
 ## Creating lists from Classes ## 
 
 ## STEP 1: Create a list of instances of the NationalPark class. This will require you to use both your first function and your
 ## NationalPark class to gather all of the class instances into one group. Use comprehension if you're feeling up to the challenege.
+states_parks = {}
+for x in state_abrv:
+	for y in CACHE_DICTION:
+		states_parks[x] = CACHE_DICTION[y]
+print("LEN DICT", len(states_parks))
 
+#states_parks is a dictionary that contains a state name and the respective html for that state. It's just easier to create a new
+#dictionary out of the CACHE_DICTION so that we can easily make lists of things. 
+all_park_names = []
+all_park_locations = []
+all_park_types = []
+for x in states_parks.values():
+	one_state = NationalPark(x)
+	all_park_names.append(one_state.park_name)
+	all_park_locations.append(one_state.park_location)
+	all_park_types.append(one_state.park_location)
+print(all_park_names)
+parks_db_load = zip(all_park_names, all_park_locations, all_park_types)
+#print(parks_db_load)
+# for x in states_parks:
+# 	print (x, states_parks[x])
+# 	print("next one")
+
+# for states_parks
 ## STEP 2: Create a list of instances of the Article class using the second function you wrote to gather all the articles listed
 ## on the front page. You will have to invoke each article as a class instance first and then save them all into a list. 
 
@@ -331,9 +354,14 @@ cur.execute(statement)
 statement = "CREATE TABLE IF NOT EXISTS parks (park_name TEXT primary key, park_location TEXT, park_type TEXT)"
 cur.execute(statement)
 #load data below...
+parks_db_lst = []
+for tup in parks_db_load:
+	parks_db_lst.append(tup)
 
-
-
+statement = "INSERT OR IGNORE INTO parks VALUES(?, ?, ?)"
+for tup in parks_db_lst:
+	cur.execute(statement, tup)
+conn.commit()
 
 ## STEP 2: Create a table for states information. 
 statement = "DROP TABLE IF EXISTS states"
