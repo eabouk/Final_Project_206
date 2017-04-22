@@ -47,12 +47,8 @@ def get_national_park_data():
 	for state in state_abrv.keys():
 	
 		if state not in CACHE_DICTION:
-
-	#lets put all keys and values in the dict
-			#print("hello")
-			# for abrv in state_abrv.values():
+	
 			base_url = "https://www.nps.gov/state/" + state_abrv.get(state) + "/index.htm"
-			#print("PRINTING BASE URL", base_url)
 			response = requests.get(base_url)
 			html_doc = response.text
 
@@ -62,27 +58,21 @@ def get_national_park_data():
 			
 			for p in page_info:
 				state_title = p.find("h1",{"class": "page-title"})
-				#print(state_title.text)
 
 			CACHE_DICTION[state_title.text] = html_doc
-			
 			f = open(CACHE_FILE, 'w')
 			f.write(json.dumps(CACHE_DICTION))
 			f.close()
 
-			#state_tup = (state_title.text, html_doc)
-			#final_list.append(state_tup)
 			final_html.append(html_doc)
-			#this portion will run if cache is empty
+			
 
 		else: 
 			final_html.append(CACHE_DICTION[state])
 
 
 	return final_html
-	#I can't decide if this function will return a list of tups with every state and it's html code or just raw html strings without
-	# a name for each one... 
-
+	
 # print(get_national_park_data())
 
 # tups_of_all_pages = get_national_park_data()
@@ -117,14 +107,6 @@ def get_frontpage_articles():
 		response = requests.get(base_url)
 		html_doc = response.text
 
-		# soup = BeautifulSoup(html_doc, "html.parser")
-		# page_info = soup.find_all("div", {"class":"Feature-imageContainer"})
-
-		# for p in page_info:
-		# 	article_title = p.find("h3",{"class":"Feature-title carrot-end"})
-		# 	nps_front_page.append(article_title.text)
-		# 	# print(article_title.text)
-
 		CACHE_DICTION["NPS_front_articles"] = html_doc
 		f = open(CACHE_FILE, 'w')
 		f.write(json.dumps(CACHE_DICTION))
@@ -154,38 +136,47 @@ class NationalPark(object):
 ## Your class will have 3 instance variables:
 ## 		-park_name: the name of the park
 ## 		-park_location: a string containing the state(s)/city of the park
-## 		-park_descriiption:  a string containing a description about the park
+## 		-park_description:  a string containing a description about the park
 ##		-park_type: the type of the park (battle ground, national park, historical landmark etc.)
 
 	def __init__(self, html_doc):
-		soup = BeautifulSoup(html_doc, "html.parser")
-		page_info = soup.find_all("div",{"class": "col-md-9 col-sm-9 col-xs-12 table-cell list_left"})
+		self.soup = BeautifulSoup(html_doc, "html.parser")
+		self.page_info = self.soup.find_all("div",{"class": "col-md-9 col-sm-9 col-xs-12 table-cell list_left"})
 		#park names
-		for p in page_info:
-			park_names = p.find_all("h3")
-			for q in park_names:
+		self.park_names = []
+		for p in self.page_info:
+			park_n = p.find_all("h3")
+			#print(park_n)
+			for q in park_n:
 				self.park_name = q.text
+				self.park_names.append(q.text)
 				#print(q.text)
 
 		#park_location
-		for l in page_info:
-			park_location = l.find_all("h4")
-			for m in park_location:
+		self.park_locations  = []
+		for l in self.page_info:
+			park_l = l.find_all("h4")
+			for m in park_l:
 				self.park_location = m.text
+				self.park_locations.append(m.text)
 				#print(m.text)
 
 		#park_description
-		for t in page_info:
-			park_description = t.find_all("p")
-			for w in park_description:
+		self.park_descriptions = []
+		for t in self.page_info:
+			park_desc = t.find_all("p")
+			for w in park_desc:
 				self.park_description = w.text
+				self.park_descriptions.append(w.text.rstrip('\n'))
 				#print(w.text)
 
 		#park_type
-		for b in page_info:
-			park_type = b.find_all("h2")
-			for p in park_type:
+		self.park_types = []
+		for b in self.page_info:
+			park_t = b.find_all("h2")
+			for p in park_t:
 				self.park_type = p.text
+				self.park_types.append(p.text)
 
 		#state_name
 		# for g in page_info:
@@ -194,16 +185,16 @@ class NationalPark(object):
 ## HTML data representing each state's park page and returns the number of parks in that state.
 
 	def num_parks(self):
-		soup = BeautifulSoup(self, "html.parser")
-		page_info = soup.find_all("div", {"id": "list_numbers"})
+		# soup = BeautifulSoup(self, "html.parser")
+		# page_info = soup.find_all("div", {"id": "list_numbers"})
 
-		for p in page_info:
-			numbers = soup.find_all("ul", {"class":"state_numbers"})
+		for p in self.page_info:
+			numbers = self.soup.find_all("ul", {"class":"state_numbers"})
 			for n in numbers:
-				num_parks = soup.find_all("li")
+				num_parks = self.soup.find_all("li")
 				for x in num_parks:
 					#print(x.text)
-					num_parks = soup.find_all("strong")
+					num_parks = self.soup.find_all("strong")
 					num_parks = num_parks[0].text
 		return num_parks
 
@@ -212,16 +203,16 @@ class NationalPark(object):
 ## visitors and returns it. You will use this number later for data processing later in this file.
 
 	def visitor_score(self, html_doc):
-		soup = BeautifulSoup(html_doc, "html.parser")
-		page_info = soup.find_all("div", {"id": "list_numbers"})
+		# soup = BeautifulSoup(html_doc, "html.parser")
+		# page_info = soup.find_all("div", {"id": "list_numbers"})
 
-		for p in page_info:
-			numbers = soup.find_all("ul", {"class":"state_numbers"})
+		for p in self.page_info:
+			numbers = self.soup.find_all("ul", {"class":"state_numbers"})
 			for n in numbers:
-				num_visitors = soup.find_all("li")
+				num_visitors = self.soup.find_all("li")
 				for x in num_visitors:
 					#print(x.text)
-					num_visitors = soup.find_all("strong")
+					num_visitors = self.soup.find_all("strong")
 					num_visitors = num_visitors[1].text
 					# for w in num_visitors:
 					# 	print(w[1])
@@ -237,10 +228,11 @@ class NationalPark(object):
 one_park = NationalPark(all_html_pages[0])
 #later I'm going to create a list of states with all their parks... maybe another dictionary? 
 #each state as a key and the list of parks by value 
-print(one_park.park_name)
-print(one_park.visitor_score(all_html_pages[0]))
+#print(one_park.park_names)
+# print (one_park.park_descriptions)
+# print(one_park.visitor_score(all_html_pages[0]))
 
-print(one_park.num_parks())
+# print(one_park.num_parks())
 
 
 
@@ -252,54 +244,52 @@ class Article(object):
 
 	def __init__(self, html_doc):
 
-		soup = BeautifulSoup(html_doc, "html.parser")
-		page_info = soup.find_all("div", {"class":"Feature-imageContainer"})
+		self.soup = BeautifulSoup(html_doc, "html.parser")
+		self.page_info = self.soup.find_all("div", {"class":"FeatureGrid-item col-xs-12"})
 
 ## STEP 2: Define 2 instance variables for this class:
 ## 		- Title: the title of the article
 ## 		- Text: the SUBHEADER of the article
 
-		for p in page_info:
+		for p in self.page_info:
 			article_title = p.find_all("h3",{"class":"Feature-title carrot-end"})
 			for r in article_title:
 				self.title = r.text
 			# print(article_title.text)
 
 
-		for p in page_info:
+		for p in self.page_info:
 			description = p.find_all("p", {"class": "Feature-description"})
 			for f in description:
 				self.description = f.text
 
-	def list_of_titles(self, html_doc):
-		list_of_titles = []
+	def list_of_titles(self):
+		self.list_of_titles = []
 
-		soup = BeautifulSoup(html_doc, "html.parser")
-		page_info = soup.find_all("div", {"class":"Feature-imageContainer"})
-
-		for p in page_info:
+		for p in self.page_info:
 			article_title = p.find_all("h3",{"class":"Feature-title carrot-end"})
 			for r in article_title:
-				list_of_titles.append(r.text)
+				self.list_of_titles.append(r.text)
 		
-		return list_of_titles
+		return self.list_of_titles
 
-	def list_of_descriptions(self, html_doc):
-		list_of_descriptions = []
+	def list_of_descriptions(self):
+		self.list_of_descriptions = []
 
-		soup = BeautifulSoup(html_doc, "html.parser")
-		page_info = soup.find_all("div", {"class":"Feature-imageContainer"})
-
-		for p in page_info:
-			description = p.find_all("p", {"class": "Feature-description"})
+		for p in self.page_info:
+			description = p.find_all("div", {"class": "Component Feature -small"})
+			#print(len(description))
 			for f in description:
-				list_of_descriptions.append(f.text)
+				description = f.find_all("p")
+				for q in description:
+					self.list_of_descriptions.append(q.text)
+				# print(f.text)
+		return self.list_of_descriptions
 
-		return list_of_descriptions
 
 article_thing = Article(all_front_articles)
-
-#print ("printing front page article titles", article_thing.list_of_titles(all_front_articles))
+#print(article_thing.list_of_descriptions())
+#print (article_thing.list_of_titles())
 
 ############### PART FOUR ############### 
 ## Creating lists from Classes ## 
@@ -308,31 +298,39 @@ article_thing = Article(all_front_articles)
 ## NationalPark class to gather all of the class instances into one group. Use comprehension if you're feeling up to the challenege.
 states_parks = {}
 for x in state_abrv:
-	for y in CACHE_DICTION:
-		states_parks[x] = CACHE_DICTION[y]
-print("LEN DICT", len(states_parks))
+	states_parks[x] = CACHE_DICTION[x]
+#print("LEN DICT", len(states_parks))
 
 #states_parks is a dictionary that contains a state name and the respective html for that state. It's just easier to create a new
 #dictionary out of the CACHE_DICTION so that we can easily make lists of things. 
-all_park_names = []
-all_park_locations = []
-all_park_types = []
-for x in states_parks.values():
-	one_state = NationalPark(x)
-	all_park_names.append(one_state.park_name)
-	all_park_locations.append(one_state.park_location)
-	all_park_types.append(one_state.park_location)
-print(all_park_names)
-parks_db_load = zip(all_park_names, all_park_locations, all_park_types)
-#print(parks_db_load)
-# for x in states_parks:
-# 	print (x, states_parks[x])
-# 	print("next one")
+all_nat_park_info = []
+for x in states_parks:
+	one_state = NationalPark(states_parks[x])
+	one_tup = zip(one_state.park_names, one_state.park_locations, one_state.park_types)
+	all_nat_park_info.append(one_tup)
 
-# for states_parks
+iterated_nat_park = []
+for tup in all_nat_park_info:
+	for item in tup:
+		iterated_nat_park.append(item)
+
 ## STEP 2: Create a list of instances of the Article class using the second function you wrote to gather all the articles listed
 ## on the front page. You will have to invoke each article as a class instance first and then save them all into a list. 
 
+article_thing = Article(all_front_articles)
+article_titles = article_thing.list_of_titles()
+# print(article_titles, len(article_titles))
+article_descriptions = article_thing.list_of_descriptions()
+# print(article_descriptions, len(article_descriptions))
+article_tup = zip(article_titles, article_descriptions)
+# print(article_tup)
+iterated_articles = []
+for tup in article_tup:
+	# for item in tup:
+	# print(tup)
+	iterated_articles.append(tup)
+print(iterated_articles)
+#LOAD THIS DATA INTO THE DATABASE
 ## STEP 3: Create a new dictionary "STATE_TEMP" that saves every state as a key band its average temparature as values. 
 ## (for example, Michigan's would be "MICHIGAN_TEMP": 45). 
 
@@ -353,15 +351,13 @@ cur.execute(statement)
 	# -park_type: (type of park) text
 statement = "CREATE TABLE IF NOT EXISTS parks (park_name TEXT primary key, park_location TEXT, park_type TEXT)"
 cur.execute(statement)
-#load data below...
-parks_db_lst = []
-for tup in parks_db_load:
-	parks_db_lst.append(tup)
 
 statement = "INSERT OR IGNORE INTO parks VALUES(?, ?, ?)"
-for tup in parks_db_lst:
-	cur.execute(statement, tup)
+for tup in iterated_nat_park:
+ 	cur.execute(statement, tup)
 conn.commit()
+
+
 
 ## STEP 2: Create a table for states information. 
 statement = "DROP TABLE IF EXISTS states"
@@ -373,14 +369,12 @@ cur.execute(statement)
 statement = "CREATE TABLE IF NOT EXISTS states (state_abrv TEXT primary key, num_parks INTEGER, revenue INTEGER)"
 cur.execute(statement)
 #load data below...
-statement = 'INSERT OR IGNORE INTO states VALUES(?)'
+statement = 'INSERT OR IGNORE INTO states VALUES(?, ?, ?)'
 
 # for thing in state_abrv.values():
 # 	cur.execute(statement, thing)
 # conn.commit()
 #will change this later!
-
-
 
 
 
@@ -391,7 +385,7 @@ cur.execute(statement)
 	# -headline: text primary key (from the "News Releases" website)
 	# -date_released: date type or var char (numbers and dashes)
 	# -related_park: text (park associated with article)
-statement = "CREATE TABLE IF NOT EXISTS articles (headline TEXT primary key, date_released VARCHAR, related_park TEXT)"
+statement = "CREATE TABLE IF NOT EXISTS articles (headline TEXT primary key, description VARCHAR)"
 cur.execute(statement)
 #load data below...
 
