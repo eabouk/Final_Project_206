@@ -198,43 +198,44 @@ class NationalPark(object):
 					num_parks = num_parks[0].text
 		return num_parks
 
-## STEP : Define a method of your class called visitor_score that takes HTML data representing each state's park page and returns 
+## STEP 4: Define a method of your class called total_revenue that takes HTML data and finds how much revenue each state will get 
+## every year from their state parks.
+	
+	def total_revenue(self):
+		for p in self.page_info:
+			for p in self.page_info:
+				numbers = self.soup.find_all("ul", {"class":"state_numbers"})
+			for n in numbers:
+				revenue = self.soup.find_all("li")
+				for x in revenue:
+					#print(x.text)
+					revenue = self.soup.find_all("strong")
+					revenue = revenue[2].text
+		return revenue
+
+## STEP 5: Define a method of your class called visitor_score that takes HTML data representing each state's park page and returns 
 ## the number of visitors that visit national parks annually. This will not affect any data, simply it finds the number of annual
 ## visitors and returns it. You will use this number later for data processing later in this file.
 
-	def visitor_score(self, html_doc):
-		# soup = BeautifulSoup(html_doc, "html.parser")
-		# page_info = soup.find_all("div", {"id": "list_numbers"})
-
+	def visitor_score(self):
+	
 		for p in self.page_info:
 			numbers = self.soup.find_all("ul", {"class":"state_numbers"})
 			for n in numbers:
 				num_visitors = self.soup.find_all("li")
 				for x in num_visitors:
-					#print(x.text)
+			
 					num_visitors = self.soup.find_all("strong")
 					num_visitors = num_visitors[1].text
-					# for w in num_visitors:
-					# 	print(w[1])
-						# num_visitors = num_visitors[1]
-						# print(num_visitors)
+					
 		return num_visitors
 
 
-#TO DO:
-# MAKE A LIST OF ALL THE PARKS FOR EVERY STATE, SAVE TO DICTIONARY
-# MAKE A LIST OF 
-
 one_park = NationalPark(all_html_pages[0])
-#later I'm going to create a list of states with all their parks... maybe another dictionary? 
-#each state as a key and the list of parks by value 
-#print(one_park.park_names)
-# print (one_park.park_descriptions)
-# print(one_park.visitor_score(all_html_pages[0]))
-
-# print(one_park.num_parks())
-
-
+print (one_park.total_revenue())
+print (one_park.visitor_score())
+print (one_park.num_parks())
+print (one_park.park_location)
 
 ############### PART THREE ############### 
 ## Class 2 ##
@@ -299,8 +300,6 @@ article_thing = Article(all_front_articles)
 states_parks = {}
 for x in state_abrv:
 	states_parks[x] = CACHE_DICTION[x]
-#print("LEN DICT", len(states_parks))
-
 #states_parks is a dictionary that contains a state name and the respective html for that state. It's just easier to create a new
 #dictionary out of the CACHE_DICTION so that we can easily make lists of things. 
 all_nat_park_info = []
@@ -319,21 +318,55 @@ for tup in all_nat_park_info:
 
 article_thing = Article(all_front_articles)
 article_titles = article_thing.list_of_titles()
-# print(article_titles, len(article_titles))
 article_descriptions = article_thing.list_of_descriptions()
-# print(article_descriptions, len(article_descriptions))
 article_tup = zip(article_titles, article_descriptions)
-# print(article_tup)
 iterated_articles = []
 for tup in article_tup:
-	# for item in tup:
-	# print(tup)
 	iterated_articles.append(tup)
-print(iterated_articles)
-#LOAD THIS DATA INTO THE DATABASE
-## STEP 3: Create a new dictionary "STATE_TEMP" that saves every state as a key band its average temparature as values. 
-## (for example, Michigan's would be "MICHIGAN_TEMP": 45). 
 
+## STEP 3: Write a function that makes a new dictionary "STATE_TEMP" that saves every state as a key band its average temparature as 
+##values. (for example, Michigan's would be "MICHIGAN_TEMP": 45). Feel free to use requests and cache the data, using this website:
+## https://www.currentresults.com/Weather/US/average-annual-state-temperatures.php
+# def find_temp_data():
+# 	STATE_TEMP = {}
+
+# 	# if "STATE_TEMP" not in CACHE_DICTION: 
+# 	base_url = "https://www.currentresults.com/Weather/US/average-annual-state-temperatures.php"
+# 	response = requests.get(base_url)
+# 	html_doc = response.text
+
+# 	list_of_temps = []
+# 	list_state_names = []
+# 	soup = BeautifulSoup(html_doc, 'html.parser')
+# 	find_temps = soup.find_all("tbody")
+# 	for f in find_temps:
+# 		print("hello")
+# 		state_find = soup.find_all('tr')
+# 		print(len(state_find))
+# 		for t in state_find:
+# 			state_find = soup.find_all('td')
+# 			for s in state_find:
+# 				# print("hello")
+# 				state_name = state_find[0].text
+# 				list_state_names.append(state_name)
+# 				state_ave_temp = state_find[1].text
+# 				list_of_temps.append(state_ave_temp)
+
+# 		STATE_TEMP = dict(zip(list_state_names, list_of_temps))
+# 		print(STATE_TEMP)
+
+# 		CACHE_DICTION["STATE_TEMP"] = STATE_TEMP
+# 		f = open(CACHE_FILE, 'w')
+# 		f.write(json.dumps(CACHE_DICTION))
+# 		f.close()
+
+# 		return CACHE_DICTION["STATE_TEMP"]
+
+# 	# else:
+# 	# 	return CACHE_DICTION["STATE_TEMP"]
+
+# print (find_temp_data())
+# print (len(CACHE_DICTION["STATE_TEMP"]))
 
 ############### PART FIVE ############### 
 ## Database Work ##
@@ -366,15 +399,11 @@ cur.execute(statement)
 	# -state_abrv: text primary key (2 letter abbreviation)
 	# -num_parks: integer 
 	# -revenue: integer (or long?)
-statement = "CREATE TABLE IF NOT EXISTS states (state_abrv TEXT primary key, num_parks INTEGER, revenue INTEGER)"
+statement = "CREATE TABLE IF NOT EXISTS states (state_abrv TEXT primary key, num_parks INTEGER, revenue INTEGER, avg_temp INTEGER)"
 cur.execute(statement)
 #load data below...
 statement = 'INSERT OR IGNORE INTO states VALUES(?, ?, ?)'
-
-# for thing in state_abrv.values():
-# 	cur.execute(statement, thing)
-# conn.commit()
-#will change this later!
+#Will finish loading this in when I gather average temp data 
 
 
 
@@ -387,8 +416,12 @@ cur.execute(statement)
 	# -related_park: text (park associated with article)
 statement = "CREATE TABLE IF NOT EXISTS articles (headline TEXT primary key, description VARCHAR)"
 cur.execute(statement)
-#load data below...
 
+#load data below...
+statement = 'INSERT OR IGNORE INTO articles VALUES(?, ?)'
+for tup in iterated_articles:
+	cur.execute(statement, tup)
+conn.commit()
 
 
 
