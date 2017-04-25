@@ -33,37 +33,71 @@ FUNCTIONS:
 	- find_temp_data():
 		This function uses the requests.get() module (like the other 2 functions above) and finds the average temperature for every state. It takes no inputs and returns a dictionary with each state and its respective average temeperature. 
 
+	-get_state_table_info(): 
+		This function checks first to see if the string "STATE_TABLE_TUPS" is in the CACHE_DICTION and if it's not, it will go through every single state's HTML page and make an instance of NationalPark in order to accumulate lists of parks and revenue for each state. It also zips other lists of information such as the state abbreviation for each state and the temperature value for each state found by the find_temp_data() function. It then compiles the list of tuples into a list and adds it to the CACHE_DICTION. If the list of state tups is already in the CACHE, it will simply return that list of state information. 
+
+
 
 CLASSES:
 	- NationalPark:
 		The constructor for this class takes in an HTML page that represents one state's national parks. The constructor will make a list of a state's parks, locations of parks, park types, and park descriptions. 
 
+		Each instance of the NationalPark class can represent either a very specific park based on a given state, or an entire state's parks, locations, and types, etc. That is why there are 8 instance variables for the constructor of the class.
+
 		NationalPark Methods:
 			num_parks():
-				This class method within the NationalPark class will return the number of parks in each state. It uses HTML parsing that was set in the class constructor. 
+				This class method within the NationalPark class will return the number of parks in each state. It uses HTML parsing that was set in the class constructor. It changes no data and uses only the information in the constructor, no additional inputs needed. 
 
 			total_revenue():
-				This method will return the amount of revenue that each state recieves from their national parks. It uses HTML parsing that was set in the class constructor. 
+				This method will return the amount of revenue that each state recieves from their national parks. It uses HTML parsing that was set in the class constructor. It changes no data and uses only the information in the constructor, no additional inputs needed. 
 
 			visitor score():
-				This method will return the total number of vistiors to national parks for a given state. It uses HTML parsing that was set in the class constructor. 
+				This method will return the total number of vistiors to national parks for a given state. It uses HTML parsing that was set in the class constructor. It changes no data and uses only the information in the constructor, no additional inputs needed. 
 
 
 	- Article:
 		The constructor for this class will take in the front page of the NPS website that was found using the get_frontpage_articles() function and will make a Beautiful Soup object to gather the titles and short descriptions of each article on the front page of the NPS website. 
 
+		One instance of this class represents an article on the front page of the NPS website. 
+
 		Article Methods:
 			list_of_titles():
-				This will use the constructor's beautiful soup object to find all the titles of articles on the front page of the NPS website and append them to a list, returning a list of titles. 
+				This will use the constructor's beautiful soup object to find all the titles of articles on the front page of the NPS website and append them to a list, returning a list of titles. It changes no data and uses only the information in the constructor, no additional inputs needed. 
 
 			list_of_descriptions():
-				This method will use the constructor's beautiful soup object to find and append to a list, all the short descriptions of every article on the NPS front page. 
+				This method will use the constructor's beautiful soup object to find and append to a list, all the short descriptions of every article on the NPS front page. It changes no data and uses only the information in the constructor, no additional inputs needed. 
 
 
 DATABASE TABLES:
 	-parks:
-		
+		The parks table has 3 values:
+			-park_name
+			-park_location
+			-park_type 
 
+		The values for this table have been accumulated by the NationalPark class. 
+
+		Each row in the table represents a National Park, and it's attributes are the name of the par, the location of the park and the type of park (national monument, national park, historic trail, etc.). 
+
+	-states: 
+		The states table has 4 values:
+			-state_abrv: Abbreviation for the state
+			-num_parks: Number of parks in each state
+			-revenue: Amount of money brought in yearly due to national park attendence
+			-avg_temp: Average yearly temperature for the state
+
+		The values for this table have been accumulated through the function get_state_table_info(), which uses the NationalPark class and the function find_temp_data(). 
+
+		Each row in the table represents a state and its attritubes are the 4 values, state_abrv, num_parks, revenue, and avg_temp.
+
+		
+	-articles:
+		The articles table has 2 values:
+			-headline: The headline of the article
+			-description: The subheader of the article 
+
+		The values for this table were accumulated by the Articles class. 
+		Each row of the articles table represents an article on the front page of the NPS front page. 
 
 DATA MANIPULATION:
 
