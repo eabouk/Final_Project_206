@@ -73,27 +73,8 @@ def get_national_park_data():
 
 	return final_html
 	
-# print(get_national_park_data())
-
-# tups_of_all_pages = get_national_park_data()
-# print(len(tups_of_all_pages))
-# #if tups... use above code
-# print("get_national_park_data start")
 
 all_html_pages = get_national_park_data()
-
-# print("get_national_park_data end")
-# print(len(all_html_pages))
-# q = 0
-# for i in all_html_pages:
-# 	# print(i)
-# 	q += 1
-# 	# print ("PIZZA", type(i))
-# 	if q == 2:
-# 		break
-
-# for i in all_html_pages:
-# 	print("PRINTING TYPE PAGE", type(i))
 
 
 ## STEP 3: Define a function that gathers HTML data representing all the front page articles on the NPS website. Do some searching
@@ -232,10 +213,10 @@ class NationalPark(object):
 
 
 one_park = NationalPark(all_html_pages[0])
-print (one_park.total_revenue())
-print (one_park.visitor_score())
-print (one_park.num_parks())
-print (one_park.park_location)
+# print (one_park.total_revenue())
+# print (one_park.visitor_score())
+# print (one_park.num_parks())
+# print (one_park.park_location)
 
 ############### PART THREE ############### 
 ## Class 2 ##
@@ -327,47 +308,63 @@ for tup in article_tup:
 ## STEP 3: Write a function that makes a new dictionary "STATE_TEMP" that saves every state as a key band its average temparature as 
 ##values. (for example, Michigan's would be "MICHIGAN_TEMP": 45). Feel free to use requests and cache the data, using this website:
 ## https://www.currentresults.com/Weather/US/average-annual-state-temperatures.php
-# def find_temp_data():
-# 	STATE_TEMP = {}
+def find_temp_data():
+	STATE_TEMP = {}
 
-# 	# if "STATE_TEMP" not in CACHE_DICTION: 
-# 	base_url = "https://www.currentresults.com/Weather/US/average-annual-state-temperatures.php"
-# 	response = requests.get(base_url)
-# 	html_doc = response.text
+	if "STATE_TEMP" not in CACHE_DICTION: 
+		base_url = "https://www.currentresults.com/Weather/US/average-annual-state-temperatures.php"
+		response = requests.get(base_url)
+		html_doc = response.text
 
-# 	list_of_temps = []
-# 	list_state_names = []
-# 	soup = BeautifulSoup(html_doc, 'html.parser')
-# 	find_temps = soup.find_all("tbody")
-# 	for f in find_temps:
-# 		print("hello")
-# 		state_find = soup.find_all('tr')
-# 		print(len(state_find))
-# 		for t in state_find:
-# 			state_find = soup.find_all('td')
-# 			for s in state_find:
-# 				# print("hello")
-# 				state_name = state_find[0].text
-# 				list_state_names.append(state_name)
-# 				state_ave_temp = state_find[1].text
-# 				list_of_temps.append(state_ave_temp)
+		list_of_temps = []
+		list_state_names = []
+		soup = BeautifulSoup(html_doc, 'html.parser')
 
-# 		STATE_TEMP = dict(zip(list_state_names, list_of_temps))
-# 		print(STATE_TEMP)
+		find_temps = soup.find_all("table", {"class": "articletable tablecol-1-left"})
+		print(len(find_temps))
 
-# 		CACHE_DICTION["STATE_TEMP"] = STATE_TEMP
-# 		f = open(CACHE_FILE, 'w')
-# 		f.write(json.dumps(CACHE_DICTION))
-# 		f.close()
+		for f in find_temps:
+			state_find = f.find_all('tbody')
 
-# 		return CACHE_DICTION["STATE_TEMP"]
+			for t in state_find:
+				narrow = t.find_all('tr')
+		 	
+				for s in narrow:
+					state_info = s.find_all("td")
+					state_name = state_info[0].text
+					state_ave_temp = state_info[1].text
+			
+					STATE_TEMP[state_name] = state_ave_temp
+					print(len(STATE_TEMP))
+		
+		CACHE_DICTION["STATE_TEMP"] = STATE_TEMP
+		f = open(CACHE_FILE, 'w')
+		f.write(json.dumps(CACHE_DICTION))
+		f.close()
 
-# 	# else:
-# 	# 	return CACHE_DICTION["STATE_TEMP"]
+		return CACHE_DICTION["STATE_TEMP"]
 
-# print (find_temp_data())
-# print (len(CACHE_DICTION["STATE_TEMP"]))
+	else:
+		return CACHE_DICTION["STATE_TEMP"]
 
+print (find_temp_data())
+print (len(CACHE_DICTION["STATE_TEMP"]))
+print(sorted(CACHE_DICTION["STATE_TEMP"]))
+## STEP 4: Write code to make lists of all the data that will be inputted into the state's table in your database. You will need 
+## a list of state_abrv, number of parks, revenue for each state, and avg_temp for each state. 
+all_state_abrv = state_abrv.values()
+
+number_all_states_parks = []
+num_revenue_all_states = []
+# for state in all_html_pages:
+# 	one_state = NationalPark(state)
+#  	revenue = one_state.total_revenue()
+#  	num_revenue_all_states.append(revenue)
+
+#  	number_parks = one_state.num_parks()
+#  	number_all_states_parks.append(number_parks)
+
+#state_table_tups = zip(state_abrv.values(), number_all_states_parks, num_revenue_all_states, sorted(CACHE_DICTION["STATE_TEMP"].values()))
 ############### PART FIVE ############### 
 ## Database Work ##
 
@@ -423,7 +420,7 @@ for tup in iterated_articles:
 	cur.execute(statement, tup)
 conn.commit()
 
-
+conn.close()
 
 
 ############### PART SIX ############### 
@@ -449,50 +446,61 @@ conn.commit()
 
 
 ############### TEST CASES ############### 
-# class PART_ONE(unittest.TestCase):
-# 	def test_caching(self):
-# 		self.assertEqual(type(CACHE_DICTION), type({}))
-# 	def test_length_HTML_returns(self):
-# 		self.assertEqual(len(all_html_pages), 54)
-# 		#testing 50 countries and 4 territories containing national parks 
-# 	def test_get_national_park_func(self):
-# 		self.assertEqual(type(get_national_park_data()), type([]))
-# 	def test_get_frontpage_aritcles_func(self):
-# 		self.assertEqual(type(get_national_park_data(), type([]))
+class TEST_PART_ONE(unittest.TestCase):
+	def test_caching(self):
+		self.assertEqual(type(CACHE_DICTION), type({}))
+	def test_get_national_park_func(self):
+		self.assertEqual(type(get_national_park_data()), type([]))
+	def test_get_frontpage_aritcles_func(self):
+		self.assertEqual(type(get_frontpage_articles()), type('s'))
 
-# class PART_TWO(unittest.TestCase):	
-# 	def test_constructor_1(self):
-# 		#create class instance here
-# 		#class_instance = NationalPark(park_name, park_state)
-# 		self.assertEqual(type(class_instance.park_state), type("this is a string"))
-# 		#testing that the state for each park is a string
-# 	def test_visitor_score(self):
-# 		#create class instance here
-# 		#class_instance = NationalPark(park_name, park_state)
-# 		self.assertEqual(type(class_instance.visitor_score), type(0))
-# 		#testing that the visitor score for a given state
-# 	def test_attendence_type(self):
-# 		#create class instance here
-# 		#class_instance = NationalPark(park_name, park_state)
-# 		self.assertEqual(type(class_instance.highest_attendence), type([]))
-# 		#testing that the method highest_attendence returns a list
-# 	def test_attendence_len(self):
-# 		self.assertEqual(len(class_instance.highest_attendence), 5)
-# 		#testing that this method returns 5 items
-# 	def test_highest_revenue(self):
-# 		#create class instance here
-# 		#class_instance = NationalPark(park_name, park_state)
-# 		self.assertEqual(type(class_instance.highest_revenue), type([]))
-# 	def test_highest_rev_len(self):
-# 		self.assertEqual(len(class_instance.highest_revenue), 5)
-# 		#testing that this method returns 5 things
-# 	def test_most_parks(self):
-# 		self.assertEqual(type(most_parks), type(tuple))
-# 		#testing that this zip computation thing returns a tuple
-# 	def test_most_parks_len(self):
-# 		self.assertEqual(len(most_parks), 5)
+class TEST_PART_TWO(unittest.TestCase):	
+	def test_constructor_1(self):
+		one_park = NationalPark(all_html_pages[0])
+		self.assertEqual(type(one_park.park_names), type([]))
+	def test_constructor_2(self):
+		one_park = NationalPark(all_html_pages[1])
+		self.assertEqual(type(one_park.park_locations), type([]))
+	def test_constructor_3(self):
+		one_park = NationalPark(all_html_pages[2])
+		self.assertEqual(type(one_park.park_locations[0]), type('hello'))
+		#testing that the first item in the lsit of parks is a string
+	def test_constructor_4(self):
+		one_park = NationalPark(all_html_pages[3])
+		self.assertEqual(type(one_park.park_descriptions), type([]))
+
+	def test_constructor_5(self):
+		one_park = NationalPark(all_html_pages[4])
+		self.assertEqual(type(one_park.park_types), type([]))	
+	def test_method_1(self):
+		one_park = NationalPark(all_html_pages[5])
+		self.assertEqual(type(one_park.num_parks()), type('s'))
+	def test_method_2(self):
+		one_park = NationalPark(all_html_pages[6])
+		self.assertEqual(type(one_park.visitor_score()), type('s'))
+	def test_method_3(self):
+		one_park = NationalPark(all_html_pages[0])
+		self.assertEqual(type(one_park.total_revenue()), type('s'))
+
+class TEST_PART_3(unittest.TestCase):
+	def test_constructor_1(self):
+		article = Article(all_front_articles)
+		self.assertEqual(type(article.title), type('s'))
+	def test_constructor_2(self):
+		article = Article(all_front_articles)
+		self.assertEqual(type(article.description), type('s'))
+	def test_lists(self):
+		article = Article(all_front_articles)
+		self.assertEqual(type(article.list_of_titles()), type([]))
+		self.assertEqual(type(article.list_of_descriptions()), type([]))
+
+class TEST_PART_4(unittest.TestCase): 
+	def test_new_dict(self):
+		self.assertEqual(len(states_parks), 54)
+	# def test_tups(self):
+	# 	self.assertEqual(iterated_nat_park[0], type((4, 5)))
 # #will write more test cases when more code is written....
 # #will solidify the test case ideas when more code is written...
 # ## Remember to invoke all your tests...
-# if __name__ == "__main__":
-# 	unittest.main(verbosity=2)
+if __name__ == "__main__":
+	unittest.main(verbosity=2)
