@@ -39,9 +39,10 @@ state_abrv = {"Alabama": "al", "Alaska": "ak", "Arizona": "az", "Arkansas": "ar"
 
 #state_abrv holds all the states and their respective abbreviation so that it can loop through HTML pages in the function below
 final_html = []
+sortd_state_abrv_values = sorted(state_abrv.values())
 def get_national_park_data():
 	
-	for state in state_abrv.keys():
+	for state in sorted(state_abrv):
 	
 		if state not in CACHE_DICTION:
 	
@@ -72,7 +73,6 @@ def get_national_park_data():
 	
 
 all_html_pages = get_national_park_data()
-print('printing number of pages', len(all_html_pages))
 
 
 ## STEP 3: Define a function that gathers HTML data representing all the front page articles on the NPS website. Do some searching
@@ -118,27 +118,26 @@ class NationalPark(object):
 ##		-park_type: the type of the park (battle ground, national park, historical landmark etc.)
 ##		NOTE: park_names, park_locations, park_descriptions and park_types are all lists of all the instance variables for each 
 ##			HTML page
+
 	def __init__(self, html_doc):
 		self.soup = BeautifulSoup(html_doc, "html.parser")
 		self.page_info = self.soup.find_all("div",{"class": "col-md-9 col-sm-9 col-xs-12 table-cell list_left"})
+
 		#park names
 		self.park_names = []
 		for p in self.page_info:
 			park_n = p.find_all("h3")
-			#print(park_n)
 			for q in park_n:
 				self.park_name = q.text
 				self.park_names.append(q.text)
-				#print(q.text)
 
-		#park_location
+		#park locations
 		self.park_locations  = []
 		for l in self.page_info:
 			park_l = l.find_all("h4")
 			for m in park_l:
 				self.park_location = m.text
 				self.park_locations.append(m.text)
-				#print(m.text)
 
 		#park_description
 		self.park_descriptions = []
@@ -147,7 +146,7 @@ class NationalPark(object):
 			for w in park_desc:
 				self.park_description = w.text
 				self.park_descriptions.append(w.text.rstrip('\n'))
-				#print(w.text)
+				
 
 		#park_type
 		self.park_types = []
@@ -161,15 +160,13 @@ class NationalPark(object):
 ## HTML data representing each state's park page and returns the number of parks in that state.
 
 	def num_parks(self):
-		# soup = BeautifulSoup(self, "html.parser")
-		# page_info = soup.find_all("div", {"id": "list_numbers"})
-
+		
 		for p in self.page_info:
 			numbers = self.soup.find_all("ul", {"class":"state_numbers"})
 			for n in numbers:
 				num_parks = self.soup.find_all("li")
 				for x in num_parks:
-					#print(x.text)
+				
 					num_parks = self.soup.find_all("strong")
 					number_parks = num_parks[0].text
 		return number_parks
@@ -184,7 +181,7 @@ class NationalPark(object):
 			for n in numbers:
 				revenue = self.soup.find_all("li")
 				for x in revenue:
-					#print(x.text)
+					
 					revenue = self.soup.find_all("strong")
 					revenue_num = revenue[2].text
 		return revenue_num
@@ -255,18 +252,17 @@ class Article(object):
 
 		for p in self.page_info:
 			description = p.find_all("div", {"class": "Component Feature -small"})
-			#print(len(description))
+		
 			for f in description:
 				description = f.find_all("p")
 				for q in description:
 					self.list_of_descriptions.append(q.text)
-				# print(f.text)
+				
 		return self.list_of_descriptions
 
 
 article_thing = Article(all_front_articles)
-#print(article_thing.list_of_descriptions())
-#print (article_thing.list_of_titles())
+
 
 ############### PART FOUR ############### 
 ## Creating lists from Classes ## 
@@ -274,7 +270,7 @@ article_thing = Article(all_front_articles)
 ## STEP 1: Create a list of instances of the NationalPark class. This will require you to use both your first function and your
 ## NationalPark class to gather all of the class instances into one group. Use comprehension if you're feeling up to the challenege.
 states_parks = {}
-for x in state_abrv:
+for x in sorted(state_abrv):
 	states_parks[x] = CACHE_DICTION[x]
 
 #states_parks is a dictionary that contains a state name and the respective html for that state. It's just easier to create a new
@@ -342,22 +338,15 @@ def find_temp_data():
 	else:
 		return CACHE_DICTION["STATE_TEMP"]
 
-#print (find_temp_data())
+
 temp_data = find_temp_data()
-# print(type(temp_data))
+
 new_temp_data = sorted(temp_data.items(), key = lambda x: x[0])
-# print(type(new_temp_data))
-# #print(new_temp_data)
+
 states, temp_values = zip(*new_temp_data)
-print("printing states and temp values", states, temp_values)
-#print("PRINTING NEW TEMP DATA", new_temp_data.values())
-#print (len(CACHE_DICTION["STATE_TEMP"]))
-#print(sorted(CACHE_DICTION["STATE_TEMP"]))
-#state_temps = sorted(CACHE_DICTION['STATE_TEMP'].values())
 
 ## STEP 4: Write code to make lists of all the data that will be inputted into the state's table in your database. You will need 
 ## a list of state_abrv, number of parks, revenue for each state, and avg_temp for each state. 
-all_state_abrv = state_abrv.values()
 
 
 def get_state_table_info():
@@ -368,36 +357,22 @@ def get_state_table_info():
 		number_all_states_parks = []
 		num_revenue_all_states = []
 		for state in sorted(states_parks):
-			#print(states_parks[state])
+
 			one_state = NationalPark(states_parks[state])
-			#before this said sorted(states_parks.keys()) and then states_parks[state] for the NationalPark(state)...
-			revenue = one_state.total_revenue()
-			#print("PRINTING REVENUE", revenue)
-			# num_revenue_all_states.append(revenue)
-
-
-			# print("caching...", state)
-			number_parks = one_state.num_parks()
-			# print("num parks...", number_parks)
-			# print("num revenue", revenue)
-			# #print("num revenue...", num_revenue_all_states)
-			# number_all_states_parks.append(number_parks)
 			
-			# one_tup = 
+			revenue = one_state.total_revenue()
+			num_revenue_all_states.append(revenue)
 
-			state_table_tups.append(zip(state_abrv[state], number_parks, revenue, CACHE_DICTION['STATE_TEMP'][state]))
-
+			number_parks = one_state.num_parks()
+			number_all_states_parks.append(number_parks)
+			
+			
+		state_table_tups = zip(sorted(state_abrv.keys()), number_all_states_parks, num_revenue_all_states, temp_values)
+		#print ("printing state table lists", num_revenue_all_states, number_all_states_parks)
 		for tup in state_table_tups:
 			iterated_list_states.append(tup)
-			print(tup)
-				
-		# state_table_zip = itertools.zip_longest(state_abrv.values(), number_all_states_parks, num_revenue_all_states, temp_values)
-
-
-		# for item in state_table_zip:
-		# 	state_table_tups.append(item)
-		# 	print("PRINTING STATE TUP", item)
-
+			#print(tup)
+		
 		CACHE_DICTION["STATE_TABLE_TUPS"] = iterated_list_states
 
 		f = open(CACHE_FILE, 'w')
@@ -410,17 +385,8 @@ def get_state_table_info():
 		return CACHE_DICTION["STATE_TABLE_TUPS"]
 
 all_state_table = get_state_table_info()
-print (sorted(all_state_table))
-print(len(all_state_table))
 
-new_state_list = []
-for tup in all_state_table:
-	new_state_list.append(tup)
-print(new_state_list)
 
-## THINGS TO FIX:
-	#- data is in states table but its off... not sure how much off but its not right
-	#-check the articles table... see if its accurate. 
 ############### PART FIVE ############### 
 ## Database Work ##
 
@@ -453,14 +419,13 @@ cur.execute(statement)
 	# -num_parks: integer 
 	# -revenue: text
 	# -avg_temp: Real (float)
-statement = "CREATE TABLE IF NOT EXISTS states (state_abrv TEXT primary key, num_parks INTEGER, revenue TEXT, avg_temp REAL)"
+statement = "CREATE TABLE IF NOT EXISTS states (state_name TEXT primary key, num_parks INTEGER, revenue TEXT, avg_temp REAL)"
 cur.execute(statement)
 #load data below...
 statement = 'INSERT OR IGNORE INTO states VALUES(?, ?, ?, ?)'
-for tup in new_state_list:
+for tup in all_state_table:
 	cur.execute(statement, tup)
 conn.commit()
-#Will finish loading this in when I gather average temp data 
 
 
 
@@ -480,34 +445,42 @@ for tup in iterated_articles:
 	cur.execute(statement, tup)
 conn.commit()
 
-conn.close()
+
 
 
 ############### PART SIX ############### 
 ## Queries ##
+data_file_info = {}
 
 ## STEP 1: Write a query to join on the states table the abrv column with the park_location on the parks table
-query = "SELECT states.state_abrv, park.park_location FROM parks INNER JOIN states on state.state_abrv = park.park_location"
+query = "SELECT states.state_name, parks.park_location FROM parks INNER JOIN states on states.state_name = parks.park_name"
 cur.execute(query)
 joined_result = cur.fetchall()
+data_file_info["joined_result"] = joined_result
+
 
 ## STEP 2: Write a query to find the states with num_parks greater than 10. Save that into a variable titled most_parks. 
-query = "SELECT num_parks FROM states WHERE states.num_parks > 10"
+query = "SELECT state_name FROM states WHERE states.num_parks > 10"
 cur.execute(query)
 most_parks = cur.fetchall()
+data_file_info["most_parks"] = most_parks
+
 
 ## STEP 3: Write a query to find the states with the hottest temperature. Save that into a variable titled hottest_temp.
-query = "SELECT avg_temp FROM states WHERE states.avg_temp > 60"
+query = "SELECT state_name FROM states WHERE states.avg_temp > 60"
+cur.execute(query)
+hottest_temp = cur.fetchall()
+data_file_info["hottest_temp"] = hottest_temp
 
 
-############### PART SEVEN ############### 
-## Data manipulation ## 
+data_file = "206_final_project.txt"
 
-## STEP 1: Use a zip function to create a list of tuples of the top 5 states with the highest revenue AND their respective revenue.
 
-## More data manipulation to come? 
-## Wondering how to create the database files before writing the classes... will finish this later? 
+file_obj = open(data_file, 'w')
+contents = file_obj.write(json.dumps(data_file_info))
+file_obj.close()
 
+conn.close()
 
 
 ############### TEST CASES ############### 
@@ -568,10 +541,7 @@ class TEST_PART_4(unittest.TestCase):
 		self.assertEqual(type(get_state_table_info()), type([]))
 	def test_get_state_info_2(self):
 		self.assertEqual(len(get_state_table_info()), 50)
-	def test_get_state_info_3(self):
-		self.assertEqual(type(all_state_table[0]), type((3, 4)))
-# #will write more test cases when more code is written....
-# #will solidify the test case ideas when more code is written...
-# ## Remember to invoke all your tests...
+
+
 if __name__ == "__main__":
 	unittest.main(verbosity=2)
