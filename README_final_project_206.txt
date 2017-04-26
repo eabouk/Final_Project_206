@@ -10,7 +10,7 @@ DESCRIPTION:
 
 
 HOW TO RUN THIS FILE/DEPENDENCIES: 
-	You will need to have Python 3 installed on your computer in order to run this file. Open your terminal window and go to the directory in which you have saved the file. Type in "python 206_final_project" in order to run the file. 
+	You will need to have Python 3 installed on your computer in order to run this file. Open your terminal window and go to the directory in which you have saved the file. Type in "sh run206Project.sh" in order to run the file. 
 
 	This file runs using the default parser with Python 3, so no additional moduals need to be installed. 
 
@@ -20,6 +20,8 @@ FILES INCLUDED:
 	- 206_final_project.py
 	- national_park_cache.json
 	- national_park_data.db
+	- 206_final_project.txt
+	- run206Project.sh
 	- README_final_project_206.txt (this file)
 
 
@@ -97,14 +99,41 @@ DATABASE TABLES:
 			-description: The subheader of the article 
 
 		The values for this table were accumulated by the Articles class. 
+
 		Each row of the articles table represents an article on the front page of the NPS front page. 
-
-DATA MANIPULATION:
-
 
 WHY THIS PROJECT MATTERS TO ME:
 
 	I chose this project because I like the idea of scraping websites for data to make inferences and calculations that will further help people understand things. The world is full of information and it can be overwhelming. But it is important to be able to gather very specific data in order to come up with a better understanding of what may be a complicated issue. This project may be a stepping stone for further data scraping projects in the future. 
+
+
+FOR SI 206
+
+	Line(s) on which each of your data gathering functions begin(s):
+		-get_national_park_data():line 43
+		-get_frontpage_articles(): line 81
+
+	Line(s) on which your class definition(s) begin(s):
+		-class NationalPark: line 111
+		-class Article: line 214
+
+	Line(s) where your database is created in the program:
+		-line 394
+
+	Line(s) of code that load data into your database:
+		-lines 404 - 410
+		-lines 422 - 428
+		-lines 439 - 446
+
+	Line(s) of code (approx) where your data processing code occurs — where in the file can we see all the processing techniques you used?
+		-starts on line 456 downward... all my queries 
+		-The file where the query results are contained is called 206_final_project.txt
+
+	Line(s) of code that generate the output.
+		-test cases at the bottom of the file: line 487 and downward 
+
+
+
 
 
 
